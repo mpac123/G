@@ -16,6 +16,9 @@ uniform float matShininess;
 
 uniform mat4 modelViewMatrix;
 uniform mat3 normalMatrix;
+uniform mat4 viewMatrixInverse;
+
+uniform bool world;
 
 vec4 light(vec3 N, vec3 V, vec3 L){
     N=normalize(N); V=normalize(V); L=normalize(L);
@@ -32,10 +35,18 @@ vec4 light(vec3 N, vec3 V, vec3 L){
 }
 
 void main() {
-    vec3 N = normalize(normalMatrix * norml);
+    /* eye space */
+    vec3 N = normalMatrix * norml;
     vec4 P = modelViewMatrix * vec4(vert,1.0);
-    vec3 L = normalize(lightPosition-P).xyz;
-    vec3 V = normalize(-P.xyz);
+    vec3 L = (lightPosition-P).xyz;
+    vec3 V = -P.xyz;
+
+    /* world space */
     
+    if (world) {
+        N=(viewMatrixInverse*vec4(N,0)).xyz;
+	    V=(viewMatrixInverse*vec4(V,0)).xyz;
+        L=(viewMatrixInverse*vec4(L,0)).xyz;
+    }
     fragColor = light(N,V,L);
 }
